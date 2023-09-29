@@ -1,0 +1,168 @@
+program = _{ SOI ~ statement* ~ EOI }
+
+statement = _{
+  importStatement
+  | variableDeclaration
+  | typeDefinition
+  | assignment
+  | whileStatement
+  | ifStatement
+  | forStatement
+  | foreachStatement
+  | functionDeclaration
+  | externFunctionDeclaration
+  | statementBlock
+  | returnStatement
+  | breakStatement
+  | continueStatement
+  | statementExpression
+}
+
+typeDefinition      = { "type " ~ identifier ~ "=" ~ TypeAnnotation }
+variableDeclaration = { "var " ~ identifier ~ (":" ~ TypeAnnotation)? ~ "=" ~ expression }
+assignment          = { prefixExpression ~ "=" ~ expression }
+importStatement = { "import" ~ "(" ~ path ~ ")" }
+
+valid_segment = _{ ASCII_ALPHA | ASCII_DIGIT | "_" | "-" | "." }
+
+name = _{ valid_segment+ }
+dir_back = @{ ".." }
+path = @{ "\"" ~ (dir_back ~ "/")* ~ name ~ ("/" ~ name)* ~ "\"" }
+
+name_letter =  { ASCII_ALPHA | "_" }
+Reserved    = @{
+    "true"
+  | "false"
+  | "type"
+  | "str"
+  | "float"
+  | "int"
+  | "bool"
+  | "table"
+  | "var"
+  | "return"
+  | "break"
+  | "continue"
+  | "if"
+  | "else"
+  | "while"
+  | "for"
+  | "fn"
+  | "in"
+  | "extern"
+  | "any"
+  | "nil"
+  | "import"
+}
+identifier  = @{ !(Reserved ~ !(name_letter | ASCII_DIGIT)) ~ name_letter ~ (name_letter | ASCII_DIGIT)* }
+
+prefixExpression = { (identifier | array | Table) ~ index* }
+index            = { "[" ~ expression ~ "]" }
+
+ifStatement =  { "if " ~ expression ~ statementBlock ~ elseClause? }
+elseClause  = _{ "else " ~ (ifStatement | statementBlock) }
+
+whileStatement = { "while " ~ expression ~ statementBlock }
+
+forStatement     = { "for " ~ identifier ~ "in" ~ expression ~ ".." ~ expression ~ statementBlock }
+foreachStatement = { "foreach " ~ identifier ~ "in" ~ expression ~ statementBlock }
+
+externFunctionDeclaration = { "extern " ~ "fn " ~ functionName ~ functionParameters ~ functionReturn? }
+functionDeclaration       = { "fn " ~ functionName ~ functionParameters ~ functionReturn? ~ functionBody }
+anonymousFunction         = { "fn" ~ functionParameters ~ functionReturn? ~ functionBody }
+anonymousFunctionType     = { "fn" ~ anonymousFunctionArgs ~ functionReturn? }
+
+anonymousFunctionArgs =  { "(" ~ (TypeAnnotation ~ ("," ~ TypeAnnotation)*)? ~ ")" }
+functionReturn        =  { "->" ~ (TypeAnnotation | identifier) }
+functionName          =  { identifier ~ ("." ~ identifier)* }
+functionParameters    =  { "(" ~ parameterList? ~ ")" }
+parameterList         = _{ param ~ ("," ~ param)* }
+param                 =  { identifier ~ ":" ~ TypeAnnotation }
+functionBody          = _{ statementBlock }
+
+statementBlock = { blockStart ~ statement* ~ blockEnd }
+
+statementExpression = _{ expression }
+
+blockStart = _{ "{" }
+blockEnd   = _{ "}" }
+
+returnStatement = { "return" ~ expression? }
+
+breakStatement = { "break" }
+
+continueStatement = { "continue" }
+
+expression = { orExpression }
+
+orExpression = _{ andExpression ~ (logicalOr ~ andExpression)* }
+
+andExpression = _{ binaryExpression ~ (logicalAnd ~ binaryExpression)* }
+
+binaryExpression = _{ unaryExpression ~ (((Operator | ComparisonOperator) ~ unaryExpression)*) }
+
+unaryExpression = _{ (logicalNot | unaryMinus)? ~ primaryExpression }
+
+unaryMinus        = @{ "-" }
+logicalNot        = @{ "!" }
+logicalOr         = @{ "||" }
+logicalAnd        = @{ "&&" }
+primaryExpression = _{
+    anonymousFunction
+  | functionCall
+  | prefixExpression
+  | Value
+  | "(" ~ expression ~ ")"
+}
+
+functionCall =  { prefixExpression ~ arguments }
+arguments    = _{ "(" ~ (argumentList?) ~ ")" }
+argumentList =  { expression ~ ("," ~ expression)* }
+
+ComparisonOperator = @{ "<=" | "<" | ">=" | ">" | "==" | "!=" }
+
+Operator = _{ Add | Subtract | Multiply | Div | Divide | Power | Mod  }
+Add      =  { "+" }
+Subtract =  { "-" }
+Multiply =  { "*" }
+Divide   =  { "/" }
+Power    =  { "^" }
+Mod      =  { "%" }
+Div      =  { "\\" }
+
+PrimitiveType = _{ FloatType | IntType | BoolType | StringType }
+literal       =  { Float | Int | String | Bool }
+
+FloatType    =  { "float" }
+Float        = @{ Int ~ ("." ~ Int) }
+IntType      = @{ "int" }
+Int          = @{ ASCII_DIGIT+ }
+BoolType     =  { "bool" }
+Bool         = @{ "true" | "false" }
+StringType   =  { "str" }
+String       = @{ "\"" ~ (escaped_char | (!"\"" ~ ANY))* ~ "\"" }
+escaped_char = @{ "\\" ~ ("\"" | "\\" | "n" | "t" | "r") }
+AnyType      = @{ "any" }
+
+Table     =  { "{" ~ fieldList? ~ "}" }
+fieldList = _{ field ~ ("," ~ field)* }
+field     =  { key ~ ":" ~ value }
+key       = _{ literal }
+value     = _{ expression }
+
+array = { "{" ~ value ~ ("," ~ value)* ~ "}" }
+
+Value    = _{ literal | identifier | array | Table | Nil }
+KeyValue =  { literal ~ ":" ~ TypeAnnotation }
+
+TableDef = { "table" ~ "[" ~ (KeyValue ~ ("," ~ KeyValue)*)* ~ "]" }
+
+Nil            = @{ "nil" }
+Type           = _{ PrimitiveType | anonymousFunctionType | TableDef | identifier | AnyType }
+TypeAnnotation =  { Type ~ ("|" ~ Type)* }
+
+LineComment  = { "//" ~ (!NEWLINE ~ ANY)* }
+BlockComment = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+COMMENT    = _{ LineComment | BlockComment }
+WHITESPACE = _{ " " | "\t" | NEWLINE | COMMENT }
