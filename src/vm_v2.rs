@@ -69,13 +69,13 @@ impl VM {
     }
 
     fn ext_to_string(&mut self, dst: usize) -> Object {
-        fn _to_string(obj: &Object) -> String {
+        fn _to_string(vm: &VM, obj: &Object) -> String {
             match obj {
                 Object::Literal(v) => v.to_string(),
                 Object::Table(t) => {
                     let params = t
                         .iter()
-                        .map(|(k, v)| format!("{k}: {}", _to_string(v)))
+                        .map(|(k, v)| format!("{k}: {}", _to_string(vm, v)))
                         .fold(String::new(), |acc, v| {
                             if acc.is_empty() {
                                 v
@@ -85,7 +85,11 @@ impl VM {
                         });
                     format!("{{{params}}}")
                 }
-                Object::ObjectRef(addr) => format!("reference to 0x{}", radix(*addr, 16)),
+                Object::ObjectRef(addr) => {
+                    let rf = Object::ObjectRef(*addr);
+                    let obj = vm.get_value_by_ref(&rf);
+                    _to_string(vm, obj)
+                },
                 Object::Function(addr) => format!("function at 0x{}", radix(*addr, 16)),
                 Object::Nil => "nil".to_string(),
             }
@@ -93,7 +97,7 @@ impl VM {
 
         let val = &self.get_reg_value(dst);
         let obj = self.get_value_by_ref(val);
-        let str = _to_string(obj);
+        let str = _to_string(self, obj);
         Object::Literal(Literal::Str(Box::new(str)))
     }
 
