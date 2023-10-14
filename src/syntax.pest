@@ -29,7 +29,7 @@ name = _{ valid_segment+ }
 dir_back = @{ ".." }
 path = @{ "\"" ~ (dir_back ~ "/")* ~ name ~ ("/" ~ name)* ~ "\"" }
 
-name_letter =  { ASCII_ALPHA | "_" }
+name_letter =  { ALPHABETIC | "_" }
 Reserved    = @{
     "true"
   | "false"

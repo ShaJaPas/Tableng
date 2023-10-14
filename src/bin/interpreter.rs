@@ -37,6 +37,7 @@ fn main() {
         return;
     };
 
+    
     let env = reg_alloc::get_env();
     match ir_gen::BytecodeBuilder::from_source(
         &source,

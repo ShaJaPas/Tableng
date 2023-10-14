@@ -89,7 +89,7 @@ impl VM {
                     let rf = Object::ObjectRef(*addr);
                     let obj = vm.get_value_by_ref(&rf);
                     _to_string(vm, obj)
-                },
+                }
                 Object::Function(addr) => format!("function at 0x{}", radix(*addr, 16)),
                 Object::Nil => "nil".to_string(),
             }
