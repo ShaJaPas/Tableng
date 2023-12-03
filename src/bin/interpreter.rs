@@ -17,6 +17,7 @@ struct Cli {
 
 fn main() {
     let args = Cli::parse();
+
     let source = if let Some(ref path) = args.file_path {
         let file = File::open(path);
         match file {
@@ -37,7 +38,6 @@ fn main() {
         return;
     };
 
-    
     let env = reg_alloc::get_env();
     match ir_gen::BytecodeBuilder::from_source(
         &source,

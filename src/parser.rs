@@ -179,7 +179,7 @@ impl TablengParser {
             }
             Rule::importStatement => {
                 let path = pair.into_inner().next().unwrap();
-                let curr_path = self.file_path.borrow().clone().unwrap_or(String::new());
+                let curr_path = self.file_path.borrow().clone().unwrap_or_default();
                 let current_path = Path::new(&curr_path).parent().unwrap();
                 let file_path =
                     current_path.join(format!("{}.tabl", path.as_str().trim_matches('"')));
@@ -208,7 +208,7 @@ impl TablengParser {
                                 )
                                 .unwrap(),
                             )
-                            .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                            .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                         )))
                     }
                 }
@@ -251,7 +251,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
         Ok(Node::Assignment(AssignmentNode {
@@ -307,7 +307,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
         let (return_type, body) = if expression.as_rule() == Rule::functionReturn {
@@ -467,7 +467,7 @@ impl TablengParser {
                             - 1,
                     )
                     .unwrap(),
-                ).with_path(&self.file_path.borrow().clone().unwrap_or(String::new())))));
+                ).with_path(&self.file_path.borrow().clone().unwrap_or_default()))));
             }
         } else {
             return Err(Into::<ParseError>::into(Box::new(
@@ -487,7 +487,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
         Ok(Node::ReturnStatement(expression.map(|f| Box::new(f.0))))
@@ -521,7 +521,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
         let statements = self.build_ast(inner_pairs.next().unwrap())?;
@@ -566,7 +566,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
 
@@ -604,7 +604,7 @@ impl TablengParser {
                         )
                         .unwrap(),
                     )
-                    .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                    .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                 )));
             }
         }
@@ -672,7 +672,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
 
@@ -730,7 +730,7 @@ impl TablengParser {
                     )
                     .unwrap(),
                 )
-                .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
             )));
         }
 
@@ -846,9 +846,7 @@ impl TablengParser {
                                     )
                                     .unwrap(),
                                 )
-                                .with_path(
-                                    &self.file_path.borrow().clone().unwrap_or(String::new()),
-                                ),
+                                .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                             )));
                         }
                     };
@@ -897,7 +895,7 @@ impl TablengParser {
                                 )
                                 .unwrap(),
                             )
-                            .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                            .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                         )
                         .into());
                     }
@@ -980,7 +978,7 @@ impl TablengParser {
                                                         .file_path
                                                         .borrow()
                                                         .clone()
-                                                        .unwrap_or(String::new()),
+                                                        .unwrap_or_default(),
                                                 ),
                                             )
                                             .into());
@@ -1014,7 +1012,7 @@ impl TablengParser {
                                                         .file_path
                                                         .borrow()
                                                         .clone()
-                                                        .unwrap_or(String::new()),
+                                                        .unwrap_or_default(),
                                                 ),
                                             )
                                             .into());
@@ -1069,7 +1067,7 @@ impl TablengParser {
                                 )
                                 .unwrap(),
                             )
-                            .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                            .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                         )
                         .into());
                     })
@@ -1241,7 +1239,7 @@ impl TablengParser {
                             )
                             .unwrap(),
                         )
-                        .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                        .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                     )
                     .into());
                 }
@@ -1366,7 +1364,7 @@ impl TablengParser {
                                 )
                                 .unwrap(),
                             )
-                            .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                            .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                         )
                         .into());
                     }
@@ -1399,7 +1397,7 @@ impl TablengParser {
                                 )
                                 .unwrap(),
                             )
-                            .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                            .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                         )
                         .into());
                     }
@@ -1435,7 +1433,7 @@ impl TablengParser {
                                 )
                                 .unwrap(),
                             )
-                            .with_path(&self.file_path.borrow().clone().unwrap_or(String::new())),
+                            .with_path(&self.file_path.borrow().clone().unwrap_or_default()),
                         )
                         .into());
                     }

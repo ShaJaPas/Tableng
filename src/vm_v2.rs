@@ -9,12 +9,6 @@ use crate::{
 };
 
 const NEXT_INDEX: usize = 0;
-const EQ_INDEX: usize = 1;
-const NEQ_INDEX: usize = 2;
-const GT_INDEX: usize = 3;
-const GTE_INDEX: usize = 4;
-const LT_INDEX: usize = 5;
-const LTE_INDEX: usize = 6;
 
 #[derive(Copy, Clone, Debug)]
 struct Frame {
@@ -831,9 +825,6 @@ impl VM {
                     self.stack[self.bp - 1] = Object::Literal(c_idx);
                     self.pop_frame();
                 }
-                OpCode::Mod { lhs, rhs, dst } => todo!(),
-                OpCode::Pow { lhs, rhs, dst } => todo!(),
-                OpCode::IntDiv { lhs, rhs, dst } => todo!(),
                 OpCode::Return { src } => {
                     let dst_src = self.bp + src as usize;
                     //println!("[] = {:?}", self.stack);
@@ -979,8 +970,14 @@ impl VM {
                     match table {
                         Object::Table(inner) => {
                             let next = inner.get(&self.bytecode.constants[NEXT_INDEX]);
-                            if next.is_some() && matches!(next.unwrap(), Object::Function(_)) {
-                                match next.unwrap() {
+                            if let Some(next) = next {
+                                if !matches!(next, Object::Function(_)) {
+                                    return Err(ParseError::RuntimeError {
+                                        message: "Iterator table must implement `__next` method"
+                                            .to_string(),
+                                    });
+                                }
+                                match next {
                                     Object::Function(f_idx) => {
                                         let (vregs, addr) = self.bytecode.functions[*f_idx];
                                         self.set_reg_value(dst + 1, src.clone());
@@ -1035,6 +1032,7 @@ impl VM {
                     };
                     self.set_reg_value(dst as usize, res);
                 }
+                _ => unimplemented!(),
             }
         }
 

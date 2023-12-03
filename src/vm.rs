@@ -824,8 +824,14 @@ impl VM {
                     match iterator {
                         Object::Table(inner) => {
                             let next = inner.get(&self.bytecode.constants[NEXT_INDEX]);
-                            if next.is_some() && matches!(next.unwrap(), Object::Function(_)) {
-                                let next = next.unwrap().clone();
+                            if let Some(next) = next {
+                                if !matches!(next, Object::Function(_)) {
+                                    return Err(ParseError::RuntimeError {
+                                        message: "Iterator table must implement `__next` method"
+                                            .to_string(),
+                                    });
+                                }
+                                let next = next.clone();
                                 self.push(iter_ref.clone());
                                 self.push(next);
                                 self.call(1)?;
