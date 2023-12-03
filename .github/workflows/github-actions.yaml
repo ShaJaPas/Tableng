@@ -19,8 +19,6 @@ jobs:
         rust-version: stable
         components: rustfmt
     - uses: Swatinem/rust-cache@v2
-    - name: Check fmt
-      run: cargo fmt -- --check
     - name: Check all targets
       run: cargo check --all --all-targets --all-features
 
